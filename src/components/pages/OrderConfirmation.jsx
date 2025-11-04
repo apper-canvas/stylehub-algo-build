@@ -71,7 +71,7 @@ const OrderConfirmation = () => {
             <h2 className="text-xl font-semibold text-primary mb-6">Order Details</h2>
             
             <div className="space-y-4">
-              {order.items.map((item) => (
+{order.items.map((item) => (
                 <div key={`${item.productId}-${item.size}-${item.color}`} className="flex gap-4">
                   <img
                     src={item.image}
@@ -85,9 +85,16 @@ const OrderConfirmation = () => {
                       {item.color && ` • Color: ${item.color}`} 
                       • Qty: {item.quantity}
                     </p>
-                    <p className="text-sm font-medium text-accent">
+                    <p className="text-sm font-medium text-accent mb-2">
                       ${(item.price * item.quantity).toFixed(2)}
                     </p>
+                    <Link
+                      to={`/reviews?productId=${item.productId}`}
+                      className="inline-flex items-center gap-1 text-sm text-accent hover:underline font-medium"
+                    >
+                      <ApperIcon name="Star" size={14} />
+                      Write a Review
+                    </Link>
                   </div>
                 </div>
               ))}

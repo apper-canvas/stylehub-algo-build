@@ -1,15 +1,19 @@
-import { createBrowserRouter } from "react-router-dom"
-import { lazy, Suspense } from "react"
-import Layout from "@/components/organisms/Layout"
+import { createBrowserRouter } from "react-router-dom";
+import React, { Suspense, lazy } from "react";
+import Layout from "@/components/organisms/Layout";
 
-const Home = lazy(() => import("@/components/pages/Home"))
-const Shop = lazy(() => import("@/components/pages/Shop"))
-const ProductDetail = lazy(() => import("@/components/pages/ProductDetail"))
-const Cart = lazy(() => import("@/components/pages/Cart"))
-const Wishlist = lazy(() => import("@/components/pages/Wishlist"))
-const Checkout = lazy(() => import("@/components/pages/Checkout"))
-const OrderConfirmation = lazy(() => import("@/components/pages/OrderConfirmation"))
-const NotFound = lazy(() => import("@/components/pages/NotFound"))
+// Lazy load components
+const Home = lazy(() => import("@/components/pages/Home"));
+const Shop = lazy(() => import("@/components/pages/Shop"));
+const ProductDetail = lazy(() => import("@/components/pages/ProductDetail"));
+const Cart = lazy(() => import("@/components/pages/Cart"));
+const Wishlist = lazy(() => import("@/components/pages/Wishlist"));
+const Checkout = lazy(() => import("@/components/pages/Checkout"));
+const OrderConfirmation = lazy(() => import("@/components/pages/OrderConfirmation"));
+const Reviews = lazy(() => import("@/components/pages/Reviews"));
+const NotFound = lazy(() => import("@/components/pages/NotFound"));
+
+// Loading component wrapper
 const LoadingSuspense = ({ children }) => (
   <Suspense
     fallback={
@@ -25,7 +29,7 @@ const LoadingSuspense = ({ children }) => (
   >
     {children}
   </Suspense>
-)
+);
 
 const mainRoutes = [
   {
@@ -54,14 +58,18 @@ const mainRoutes = [
     element: <LoadingSuspense><Checkout /></LoadingSuspense>
   },
   {
-    path: "order-confirmation/:orderId",
+    path: "order-confirmation/:orderId?",
     element: <LoadingSuspense><OrderConfirmation /></LoadingSuspense>
+  },
+  {
+    path: "reviews",
+    element: <LoadingSuspense><Reviews /></LoadingSuspense>
   },
   {
     path: "*",
     element: <LoadingSuspense><NotFound /></LoadingSuspense>
   }
-]
+];
 
 const routes = [
   {
@@ -69,6 +77,6 @@ const routes = [
     element: <Layout />,
     children: mainRoutes
   }
-]
+];
 
-export const router = createBrowserRouter(routes)
+export const router = createBrowserRouter(routes);

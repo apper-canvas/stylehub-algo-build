@@ -4,9 +4,11 @@ import { useDispatch, useSelector } from "react-redux"
 import { motion } from "framer-motion"
 import ApperIcon from "@/components/ApperIcon"
 import ProductCard from "@/components/molecules/ProductCard"
+import ReviewCard from "@/components/molecules/ReviewCard"
 import Loading from "@/components/ui/Loading"
 import Error from "@/components/ui/Error"
 import { productService } from "@/services/api/productService"
+import { reviewService } from "@/services/api/reviewService"
 import { addToCart } from "@/store/slices/cartSlice"
 import { addToWishlist, removeFromWishlist, selectIsInWishlist } from "@/store/slices/wishlistSlice"
 import { toast } from "react-toastify"
@@ -16,24 +18,31 @@ const ProductDetail = () => {
   const dispatch = useDispatch()
   const [product, setProduct] = useState(null)
   const [relatedProducts, setRelatedProducts] = useState([])
+  const [reviews, setReviews] = useState([])
+  const [reviewStats, setReviewStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedSize, setSelectedSize] = useState("")
   const [selectedColor, setSelectedColor] = useState("")
-const [quantity, setQuantity] = useState(1)
+  const [quantity, setQuantity] = useState(1)
+  const [activeTab, setActiveTab] = useState("reviews")
   const isInWishlist = useSelector(selectIsInWishlist(product?.Id))
-  const loadProduct = async () => {
+const loadProduct = async () => {
     try {
       setLoading(true)
       setError("")
-      const [productData, related] = await Promise.all([
+      const [productData, related, productReviews, stats] = await Promise.all([
         productService.getById(id),
-        productService.getRelated(id)
+        productService.getRelated(id),
+        reviewService.getByProductId(id),
+        reviewService.getProductStats(id)
       ])
       
       setProduct(productData)
       setRelatedProducts(related)
+      setReviews(productReviews)
+      setReviewStats(stats)
       
       // Set default selections
       if (productData.sizes?.length > 0) {
@@ -164,8 +173,8 @@ const handleAddToCart = () => {
                 {product.name}
               </h1>
               
-              {/* Rating */}
-              {product.rating && (
+{/* Rating */}
+              {reviewStats && reviewStats.totalReviews > 0 && (
                 <div className="flex items-center gap-2 mb-4">
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
@@ -173,7 +182,7 @@ const handleAddToCart = () => {
                         key={i}
                         name="Star"
                         size={16}
-                        className={i < Math.floor(product.rating) 
+                        className={i < Math.floor(reviewStats.averageRating) 
                           ? "text-accent fill-current" 
                           : "text-gray-300"
                         }
@@ -181,8 +190,14 @@ const handleAddToCart = () => {
                     ))}
                   </div>
                   <span className="text-sm text-gray-600">
-                    ({product.reviews?.length || 0} reviews)
+                    {reviewStats.averageRating} ({reviewStats.totalReviews} reviews)
                   </span>
+                  <a 
+                    href="#reviews"
+                    className="text-sm text-accent hover:underline ml-1"
+                  >
+                    See all reviews
+                  </a>
                 </div>
               )}
 
@@ -344,6 +359,94 @@ const handleAddToCart = () => {
             </div>
           </motion.div>
         </div>
+
+{/* Reviews Section */}
+        <section id="reviews" className="mt-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl font-display font-bold text-primary mb-8 text-center">
+              Customer Reviews
+            </h2>
+
+            {reviewStats && reviewStats.totalReviews > 0 ? (
+              <>
+                {/* Review Summary */}
+                <div className="bg-gray-50 rounded-lg p-6 mb-8">
+                  <div className="text-center mb-6">
+                    <div className="text-4xl font-bold text-primary mb-2">
+                      {reviewStats.averageRating}
+                    </div>
+                    <div className="flex justify-center mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <ApperIcon
+                          key={i}
+                          name="Star"
+                          size={20}
+                          className={i < Math.floor(reviewStats.averageRating) 
+                            ? "text-accent fill-current" 
+                            : "text-gray-300"
+                          }
+                        />
+                      ))}
+                    </div>
+                    <p className="text-gray-600">
+                      Based on {reviewStats.totalReviews} review{reviewStats.totalReviews !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+
+                  {/* Rating Breakdown */}
+                  <div className="max-w-md mx-auto">
+                    {[5, 4, 3, 2, 1].map((rating) => (
+                      <div key={rating} className="flex items-center gap-2 mb-2">
+                        <span className="text-sm w-8">{rating}</span>
+                        <ApperIcon name="Star" size={14} className="text-accent fill-current" />
+                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-accent h-2 rounded-full"
+                            style={{
+                              width: `${reviewStats.totalReviews > 0 ? (reviewStats.ratingBreakdown[rating] / reviewStats.totalReviews) * 100 : 0}%`
+                            }}
+                          />
+                        </div>
+                        <span className="text-sm text-gray-600 w-8">
+                          {reviewStats.ratingBreakdown[rating]}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Reviews List */}
+                <div className="space-y-6">
+                  {reviews.slice(0, 5).map((review, index) => (
+                    <ReviewCard key={review.Id} review={review} index={index} />
+                  ))}
+                  
+                  {reviews.length > 5 && (
+                    <div className="text-center">
+                      <p className="text-gray-600 mb-4">
+                        Showing 5 of {reviews.length} reviews
+                      </p>
+                      {/* In a real app, this would show all reviews or paginate */}
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <ApperIcon name="MessageSquare" size={48} className="text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-medium text-gray-600 mb-2">No Reviews Yet</h3>
+                <p className="text-gray-500 mb-6">
+                  Be the first to review this product and help other customers make their decision.
+                </p>
+              </div>
+            )}
+          </motion.div>
+        </section>
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
