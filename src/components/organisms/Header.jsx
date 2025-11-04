@@ -9,9 +9,10 @@ import SearchBar from "@/components/molecules/SearchBar"
 import MobileMenu from "@/components/molecules/MobileMenu"
 
 const Header = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const cartItemsCount = useSelector(selectCartItemsCount)
+  const wishlistItemsCount = useSelector(selectWishlistItemsCount)
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
@@ -125,13 +126,13 @@ const Header = () => {
               className="relative p-2 rounded-md text-primary hover:bg-secondary transition-colors"
             >
               <ApperIcon name="Heart" size={20} />
-              {useSelector(selectWishlistItemsCount) > 0 && (
+{wishlistItemsCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   className="absolute -top-1 -right-1 bg-red-500 text-surface text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
                 >
-                  {useSelector(selectWishlistItemsCount)}
+                  {wishlistItemsCount}
                 </motion.span>
               )}
             </Link>
