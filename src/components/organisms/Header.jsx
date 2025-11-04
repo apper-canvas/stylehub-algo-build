@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux"
 import { motion, AnimatePresence } from "framer-motion"
 import ApperIcon from "@/components/ApperIcon"
 import { selectCartItemsCount, toggleCart } from "@/store/slices/cartSlice"
+import { selectWishlistItemsCount } from "@/store/slices/wishlistSlice"
 import SearchBar from "@/components/molecules/SearchBar"
 import MobileMenu from "@/components/molecules/MobileMenu"
 
@@ -103,8 +104,7 @@ const Header = () => {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-250 group-hover:w-full"></span>
             </Link>
           </nav>
-
-          {/* Search and Cart */}
+{/* Search, Wishlist and Cart */}
           <div className="flex items-center space-x-4">
             {/* Desktop Search */}
             <div className="hidden md:block">
@@ -118,6 +118,23 @@ const Header = () => {
             >
               <ApperIcon name="Search" size={20} />
             </button>
+
+            {/* Wishlist Button */}
+            <Link
+              to="/wishlist"
+              className="relative p-2 rounded-md text-primary hover:bg-secondary transition-colors"
+            >
+              <ApperIcon name="Heart" size={20} />
+              {useSelector(selectWishlistItemsCount) > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-1 -right-1 bg-red-500 text-surface text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
+                >
+                  {useSelector(selectWishlistItemsCount)}
+                </motion.span>
+              )}
+            </Link>
 
             {/* Cart Button */}
             <button

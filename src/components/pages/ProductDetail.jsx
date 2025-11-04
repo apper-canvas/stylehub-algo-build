@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { motion } from "framer-motion"
 import ApperIcon from "@/components/ApperIcon"
 import ProductCard from "@/components/molecules/ProductCard"
@@ -8,6 +8,7 @@ import Loading from "@/components/ui/Loading"
 import Error from "@/components/ui/Error"
 import { productService } from "@/services/api/productService"
 import { addToCart } from "@/store/slices/cartSlice"
+import { addToWishlist, removeFromWishlist, selectIsInWishlist } from "@/store/slices/wishlistSlice"
 import { toast } from "react-toastify"
 
 const ProductDetail = () => {
@@ -20,8 +21,8 @@ const ProductDetail = () => {
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedSize, setSelectedSize] = useState("")
   const [selectedColor, setSelectedColor] = useState("")
-  const [quantity, setQuantity] = useState(1)
-
+const [quantity, setQuantity] = useState(1)
+  const isInWishlist = useSelector(selectIsInWishlist(product?.Id))
   const loadProduct = async () => {
     try {
       setLoading(true)
@@ -53,7 +54,7 @@ const ProductDetail = () => {
     window.scrollTo(0, 0)
   }, [id])
 
-  const handleAddToCart = () => {
+const handleAddToCart = () => {
     if (!selectedSize && product.sizes?.length > 0) {
       toast.error("Please select a size")
       return
@@ -75,6 +76,16 @@ const ProductDetail = () => {
     }))
     
     toast.success("Added to cart!")
+  }
+
+  const handleWishlistToggle = () => {
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(product.Id))
+      toast.success(`Removed ${product.name} from wishlist`)
+    } else {
+      dispatch(addToWishlist(product))
+      toast.success(`Added ${product.name} to wishlist`)
+    }
   }
 
   if (loading) return <Loading type="detail" />
@@ -295,10 +306,22 @@ const ProductDetail = () => {
                 <ApperIcon name="ShoppingBag" size={20} className="inline mr-2" />
                 {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
               </button>
-              
-              <button className="w-full py-4 bg-transparent text-primary border-2 border-primary rounded-md hover:bg-primary hover:text-surface transition-colors font-medium text-lg">
-                <ApperIcon name="Heart" size={20} className="inline mr-2" />
-                Add to Wishlist
+<button 
+                onClick={handleWishlistToggle}
+                className={`w-full py-4 border-2 rounded-md transition-colors font-medium text-lg ${
+                  isInWishlist 
+                    ? 'bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600' 
+                    : 'bg-transparent text-primary border-primary hover:bg-primary hover:text-surface'
+                }`}
+              >
+                <ApperIcon 
+                  name="Heart" 
+                  size={20} 
+                  className={`inline mr-2 transition-all ${
+                    isInWishlist ? 'fill-current' : ''
+                  }`} 
+                />
+                {isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
               </button>
             </div>
 

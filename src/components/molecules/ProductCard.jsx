@@ -1,41 +1,49 @@
-import { Link } from "react-router-dom"
-import { useDispatch } from "react-redux"
-import { motion } from "framer-motion"
-import ApperIcon from "@/components/ApperIcon"
-import { addToCart } from "@/store/slices/cartSlice"
-import { toast } from "react-toastify"
+import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { motion } from "framer-motion";
+import { addToWishlist, removeFromWishlist, selectIsInWishlist } from "@/store/slices/wishlistSlice";
+import { toast } from "react-toastify";
+import React from "react";
+import ApperIcon from "@/components/ApperIcon";
+import { addToCart } from "@/store/slices/cartSlice";
 
-const ProductCard = ({ product }) => {
+function ProductCard({ product }) {
   const dispatch = useDispatch()
+  const isInWishlist = useSelector(selectIsInWishlist(product.Id))
+
+  const discountPercentage = Math.round(
+    ((product.originalPrice - product.price) / product.originalPrice) * 100
+  )
 
   const handleQuickAdd = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    
-    const defaultSize = product.sizes?.[0] || "M"
-    const defaultColor = product.colors?.[0]?.name || "Default"
-    
+
     dispatch(addToCart({
       productId: product.Id.toString(),
       name: product.name,
       price: product.price,
-      size: defaultSize,
-      color: defaultColor,
-      image: product.images[0]
+      image: product.images[0],
+      quantity: 1
     }))
-    
-    toast.success("Added to cart!")
+
+    toast.success(`${product.name} added to cart!`)
   }
 
-  const discountPercentage = product.originalPrice 
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0
-
-  return (
+  const handleWishlistToggle = () => {
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(product.Id))
+      toast.success(`Removed ${product.name} from wishlist`)
+    } else {
+      dispatch(addToWishlist(product))
+      toast.success(`Added ${product.name} to wishlist`)
+    }
+  }
+return (
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
-      className="group relative bg-surface rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
+className="group relative bg-surface rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
     >
       <Link to={`/product/${product.Id}`} className="block">
         {/* Image */}
@@ -52,6 +60,25 @@ const ProductCard = ({ product }) => {
               -{discountPercentage}%
             </div>
           )}
+
+          {/* Wishlist Button */}
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              handleWishlistToggle()
+            }}
+            className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-white rounded-full shadow-sm hover:shadow-md transition-all duration-200 group/btn"
+          >
+            <ApperIcon 
+              name="Heart" 
+              size={16} 
+              className={`transition-all duration-200 group-hover/btn:scale-110 ${
+                isInWishlist 
+                  ? 'text-red-500 fill-current' 
+                  : 'text-gray-400 hover:text-red-500'
+              }`}
+            />
+          </button>
 
           {/* Quick Add Button */}
           <motion.button
