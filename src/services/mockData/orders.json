@@ -1,0 +1,35 @@
+[
+  {
+    "Id": 1,
+    "items": [
+      {
+        "productId": "1",
+        "name": "Elegant Silk Blouse",
+        "price": 129.99,
+        "quantity": 1,
+        "size": "M",
+        "color": "White",
+        "image": "https://images.unsplash.com/photo-1564584217132-2271feaeb3c5?w=800"
+      }
+    ],
+    "subtotal": 129.99,
+    "shipping": 8.99,
+    "tax": 11.70,
+    "total": 150.68,
+    "shippingAddress": {
+      "firstName": "Jane",
+      "lastName": "Doe",
+      "email": "jane.doe@example.com",
+      "phone": "555-0123",
+      "address": "123 Fashion St",
+      "city": "New York",
+      "state": "NY",
+      "zipCode": "10001",
+      "country": "US"
+    },
+    "paymentMethod": "Credit Card",
+    "status": "delivered",
+    "createdAt": "2024-01-15T14:30:00Z",
+    "estimatedDelivery": "2024-01-22T14:30:00Z"
+  }
+]
